@@ -9,7 +9,7 @@ import org.neuroph.nnet.Hopfield;
 public class Main {
 	
 	public static void main(String[] args) {
-		//set de entrenamiento
+		//creo un set de entrenamiento
 		DataSet trainingSet = new DataSet(9);
 		trainingSet.add(new DataSetRow(new double[]{1,0,1, 1, 1, 1, 1, 0, 1}));
 		trainingSet.add(new DataSetRow(new double[]{1, 1, 1, 0, 1, 0, 0, 1, 0}));
@@ -18,11 +18,13 @@ public class Main {
 		Hopfield network = new Hopfield(9);
 		network.learn(trainingSet);
 		
+		//creo un set de pruebas
 		DataSet testSet = new DataSet(9);
 		testSet.add(new DataSetRow(new double[]{1, 0, 0, 1, 0, 1, 1, 0, 1}));
 		testSet.add(new DataSetRow(new double[]{1, 1, 1, 0, 1, 0, 0, 1, 0}));
 		testSet.add(new DataSetRow(new double[]{1, 0, 1, 0, 1, 0, 0, 1, 0}));
 		
+		//para cada input del set de pruebas ejecuto la red e imprimo resultados
 		for(DataSetRow row : testSet.getRows()) {
 			network.setInput(row.getInput());
 			network.calculate();
