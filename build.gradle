@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
 
 sourceCompatibility = 1.8
 version= '1.0-SNAPSHOT'
@@ -7,6 +8,9 @@ repositories {
 	jcenter()
   maven {
     url "http://neuroph.sourceforge.net/maven2/"
+  }
+  maven {
+	url "http://m2.objectdb.com"
   }
 }
 
