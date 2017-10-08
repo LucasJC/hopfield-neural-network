@@ -20,8 +20,10 @@ public class Main {
 	
 	public static void main(String[] args) {
 		List<DataSetRow> datasetrows = new ArrayList<DataSetRow>();
-		File folder = new File("letters");
-		File[] files = folder.listFiles();
+		//File folder = new File("letters");
+		//File[] files = folder.listFiles();
+		File[] files = new File[1];
+		files[0] = new File("letters/01.png");
 		
 		for(File file : files) {
 			try {
@@ -44,7 +46,7 @@ public class Main {
 		
 		double[] testData = null;
 		try {
-			testData = getImage(new File("01.png"));
+			testData = getImage(new File("letters/01.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
