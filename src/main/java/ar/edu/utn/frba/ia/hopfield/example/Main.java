@@ -1,5 +1,6 @@
 package ar.edu.utn.frba.ia.hopfield.example;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +54,7 @@ public class Main {
 		
 		DataSetRow test = new DataSetRow(testData);
 		network.setInput(test.getInput());
-		network.calculate();	
+		network.calculate();
 		
 		try {
 			createImage("result", network.getOutput());
@@ -72,8 +73,12 @@ public class Main {
 		
 		for(int x = 0; x < image.getWidth(); x++) {
 			for(int y = 0; y < image.getHeight(); y++) {
-				double color = (double)image.getRGB(x, y);				
-				data[item++] = color;
+				int color = image.getRGB(x, y);	
+				
+				if(color == Color.WHITE.getRGB())
+					data[item++] = 0;
+				else
+					data[item++] = 1;
 			}
 		}
 			
@@ -85,8 +90,15 @@ public class Main {
 
 		int item = 0;
 		for(int x = 0; x < image.getWidth(); x++) {
-			for(int y = 0; y < image.getHeight(); y++) {
-				image.setRGB(x, y, (int)data[item++]);
+			for(int y = 0; y < image.getHeight(); y++) {		
+				int color = (int)data[item++];
+				
+				if(color == 0)
+					color = Color.WHITE.getRGB();
+				else
+					color = Color.BLACK.getRGB();
+				
+				image.setRGB(x, y, color);
 			}
 		}
 		
