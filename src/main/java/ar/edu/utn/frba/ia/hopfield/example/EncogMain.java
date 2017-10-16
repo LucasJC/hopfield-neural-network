@@ -25,6 +25,8 @@ public class EncogMain {
 	private static final int MAX_ITERATIONS = 100;
 	//carpeta de entrenamiento
 	private static final String TRAINING_FILES_FOLDER = "bwletters/";
+	//carpeta de pruebas
+	private static final String TESTING_FILES_FOLDER = "test/";
 	//carpeta principal
 	private static final String NETWORK_FILE_FOLDER = "networks/";
 	//cantidad de veces a aprender un patrón
@@ -49,6 +51,7 @@ public class EncogMain {
 		HopfieldNetwork network = null;
 		URL networkFolder = ClassLoader.getSystemResource(NETWORK_FILE_FOLDER); 
 		File trainingFolder = new File(ClassLoader.getSystemResource(TRAINING_FILES_FOLDER).getFile());
+		File testFolder = new File(ClassLoader.getSystemResource(TESTING_FILES_FOLDER).getFile());
 		File patternsFile = new File(networkFolder.getFile(), NETWORK_PATTERNS_FILE);
 		
 		//cargo los patrones de entrenamiento en una instancia de Properties para poder comparar con el resultado luego
@@ -60,32 +63,38 @@ public class EncogMain {
 		//entreno la red con los patrones de la carpeta de entrenamiento
 		int imgCargadas = 1;
 		int imgTotales = trainingFolder.listFiles().length;
-		BiPolarNeuralData data;
+
 		for (File img : trainingFolder.listFiles()) {
-			System.out.println("cargando imagen " + img.getName() + " ("+ imgCargadas + "/" + imgTotales +")");
-			data = new BiPolarNeuralData(toBooleanData(img));
+			System.out.println("->cargando imagen " + img.getName() + " ("+ imgCargadas + "/" + imgTotales +")");
+			BiPolarNeuralData data = new BiPolarNeuralData(toBooleanData(img));
 			for(int i = 0; i < STORE_COUNT; i++){
 				network.addPattern(data);
 			}
 			imgCargadas++;
 		}
-
-		//cargo la imagen a testear
-		BiPolarNeuralData test = new BiPolarNeuralData(toBooleanData(new File("F:/Workspaces/tengwar-rna/src/main/resources/bwletters/result18.png")));
-		//hago la evaluación del patrón de prueba contra la red
-		BiPolarNeuralData result = evaluatePattern(network, test);
-		//comparo el resultado con los patrones alamcenados para ver si hay coincidencia
-		checkMatch(result);
-		//además persisto el resultado como imagen para poder visualizarlo
-		try {
-			ImageIO.write(toImage(result), "png", new File(networkFolder.getFile(), "result.png"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
+		//evalúo elementos
+		int imgProcesadas = 1;
+		int imgPruebaTotales = trainingFolder.listFiles().length;
+		for (File img : testFolder.listFiles()) {
+			System.out.println("->evaluando imagen de prueba " + img.getName() + " ("+ imgProcesadas + "/" + imgPruebaTotales +")");
+			//convierto imagen a datos de entrada
+			BiPolarNeuralData data = new BiPolarNeuralData(toBooleanData(img));
+			//evalúo la entrada con la red
+			BiPolarNeuralData result = evaluatePattern(network, data);
+			//comparo el resultado con los patrones almacenados para ver si hay coincidencia
+			checkMatch(result);
+			//además persisto el resultado como imagen para poder visualizarlo
+			try {
+				ImageIO.write(toImage(result), "png", new File(networkFolder.getFile(), img.getName() +"_result.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			imgProcesadas++;
+		}
+
 		long diffInMillis = Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis();
 		System.out.println("Tiempo de ejecución en segundos: " + diffInMillis / 1000);
-		System.out.println(toText(result));
 	}
 	
 	/**
