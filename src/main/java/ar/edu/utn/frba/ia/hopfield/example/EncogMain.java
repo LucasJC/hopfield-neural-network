@@ -59,6 +59,8 @@ public class EncogMain {
 		
 
 		//inicializo la red neuronal
+		System.out.println("Generando red neuronal de " + neuronCount + " neuronas...");
+		System.out.println("A continuación se entrenará la red:");
 		network = new HopfieldNetwork((int) (neuronCount));
 		//entreno la red con los patrones de la carpeta de entrenamiento
 		int imgCargadas = 1;
@@ -72,10 +74,11 @@ public class EncogMain {
 			}
 			imgCargadas++;
 		}
-		
+		System.out.println("Fin del entrenamiento.");
+		System.out.println("A continuación se realizarán las validaciones:");
 		//evalúo elementos
 		int imgProcesadas = 1;
-		int imgPruebaTotales = trainingFolder.listFiles().length;
+		int imgPruebaTotales = testFolder.listFiles().length;
 		for (File img : testFolder.listFiles()) {
 			System.out.println("->evaluando imagen de prueba " + img.getName() + " ("+ imgProcesadas + "/" + imgPruebaTotales +")");
 			//convierto imagen a datos de entrada
@@ -92,7 +95,7 @@ public class EncogMain {
 			}
 			imgProcesadas++;
 		}
-
+		System.out.println("Fin de la ejecución");
 		long diffInMillis = Calendar.getInstance().getTimeInMillis() - startTime.getTimeInMillis();
 		System.out.println("Tiempo de ejecución en segundos: " + diffInMillis / 1000);
 	}

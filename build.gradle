@@ -1,6 +1,16 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
 apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.8
 version= '1.0-SNAPSHOT'
@@ -23,6 +33,13 @@ sourceSets {
   }
   test {
     output.resourcesDir = "bin/classes/test"
+  }
+}
+
+//create a single jar with all dependencies
+task fullJar(type: Jar) {
+  manifest {
+    attributes 'Main-Class': 'ar.edu.utn.frba.ia.hopfield.example.EncogMain'
   }
 }
 

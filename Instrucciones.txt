@@ -1,0 +1,8 @@
+-Para ejecutar la prueba es suficiente con ejecutar el bat 'ejecutar-prueba.bat'.
+-Los archivos resultado pueden encontrarse en 'bin\classes\main\networks'.
+-Si se desea modificar las imágenes de entrenamiento, modificar los archivos de:
+'src\main\resources\bwletters'
+-Si se desea modificar las imágenes de prueba, modificar los archivos de:
+'src\main\resources\test'
+
+NOTA: Si la aplicación no carga nuevas imágenes de entrenamiento, es posible que haya que eliminar la carpeta bin y luego volver a ejecutar la aplicación.
