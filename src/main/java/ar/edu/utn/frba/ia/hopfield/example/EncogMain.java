@@ -17,56 +17,66 @@ import org.encog.ml.data.specific.BiPolarNeuralData;
 import org.encog.neural.thermal.HopfieldNetwork;
 
 public class EncogMain {
-	
+	//alto de la entrada
 	private static final int HEIGHT = 61;
+	//ancho de la entrada
 	private static final int WIDTH = 79;
+	//máximo de iteraciones para verificación
 	private static final int MAX_ITERATIONS = 100;
+	//carpeta de entrenamiento
 	private static final String TRAINING_FILES_FOLDER = "bwletters/";
+	//carpeta principal
 	private static final String NETWORK_FILE_FOLDER = "networks/";
-	private static final String NETWORK_FILE = "hopfield.eg";
-	private static final String NETWORK_PATTERNS_FILE = "patterns.properties";
+	//cantidad de veces a aprender un patrón
 	private static final int STORE_COUNT = 1;
-	
+	//archivo para guardar los patrones como texto
+	private static final String NETWORK_PATTERNS_FILE = "patterns.properties";
+	//Properties para patrones como texto
 	private static Properties patterns = new Properties();
 	
+	/**
+	 * 
+	 * Ejecución principal de la aplicación
+	 * 
+	 * @param args
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		
 		Calendar startTime = Calendar.getInstance();
 		int neuronCount = WIDTH*HEIGHT;
 		HopfieldNetwork network = null;
 		URL networkFolder = ClassLoader.getSystemResource(NETWORK_FILE_FOLDER); 
-		File networkFile = new File(networkFolder.getFile(), NETWORK_FILE);
 		File trainingFolder = new File(ClassLoader.getSystemResource(TRAINING_FILES_FOLDER).getFile());
 		File patternsFile = new File(networkFolder.getFile(), NETWORK_PATTERNS_FILE);
 		
+		//cargo los patrones de entrenamiento en una instancia de Properties para poder comparar con el resultado luego
 		collectPatterns(trainingFolder, patternsFile);
+		
 
-		//if(networkFile.exists()) network = (HopfieldNetwork) EncogDirectoryPersistence.loadObject(networkFile);
-
-		if(null == network) {
-			network = new HopfieldNetwork((int) (neuronCount));
-			
-			int imgCargadas = 1;
-			int imgTotales = trainingFolder.listFiles().length;
-			BiPolarNeuralData data;
-			for (File img : trainingFolder.listFiles()) {
-				System.out.println("cargando imagen " + img.getName() + " ("+ imgCargadas + "/" + imgTotales +")");
-				data = new BiPolarNeuralData(toBooleanData(img));
-				for(int i = 0; i < STORE_COUNT; i++){
-					network.addPattern(data);
-				}
-				imgCargadas++;
+		//inicializo la red neuronal
+		network = new HopfieldNetwork((int) (neuronCount));
+		//entreno la red con los patrones de la carpeta de entrenamiento
+		int imgCargadas = 1;
+		int imgTotales = trainingFolder.listFiles().length;
+		BiPolarNeuralData data;
+		for (File img : trainingFolder.listFiles()) {
+			System.out.println("cargando imagen " + img.getName() + " ("+ imgCargadas + "/" + imgTotales +")");
+			data = new BiPolarNeuralData(toBooleanData(img));
+			for(int i = 0; i < STORE_COUNT; i++){
+				network.addPattern(data);
 			}
-			//EncogDirectoryPersistence.saveObject(networkFile, network);
-			System.out.println("Red guardada: " + networkFile.getAbsolutePath());
+			imgCargadas++;
 		}
-		//imagen a testear
-		BiPolarNeuralData test = new BiPolarNeuralData(toBooleanData(new File("F:/Workspaces/tengwar-rna/src/main/resources/bwletters/result18.png")));
 
+		//cargo la imagen a testear
+		BiPolarNeuralData test = new BiPolarNeuralData(toBooleanData(new File("F:/Workspaces/tengwar-rna/src/main/resources/bwletters/result18.png")));
+		//hago la evaluación del patrón de prueba contra la red
 		BiPolarNeuralData result = evaluatePattern(network, test);
-		
+		//comparo el resultado con los patrones alamcenados para ver si hay coincidencia
 		checkMatch(result);
-		
+		//además persisto el resultado como imagen para poder visualizarlo
 		try {
 			ImageIO.write(toImage(result), "png", new File(networkFolder.getFile(), "result.png"));
 		} catch (IOException e) {
@@ -78,6 +88,13 @@ public class EncogMain {
 		System.out.println(toText(result));
 	}
 	
+	/**
+	 * 
+	 * Compara un {@link BiPolarNeuralData} pasándolo a texto con un conjunto de {@link Properties} para encontrar coincidencia
+	 * 
+	 * @param result
+	 * @return
+	 */
 	private static boolean checkMatch(BiPolarNeuralData result) {
 		String resultText = toText(result);
 		String match = null;
@@ -97,6 +114,15 @@ public class EncogMain {
 		}
 	}
 
+	/**
+	 * 
+	 * Convierte un conjunto de imágenes en texto y los almacena en una instancia de {@link Properties}
+	 * 
+	 * @param trainingFolder
+	 * @param resultFile
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
 	private static void collectPatterns(File trainingFolder, File resultFile) throws FileNotFoundException, IOException {
 		BiPolarNeuralData data;
 		patterns = new Properties();
@@ -107,6 +133,13 @@ public class EncogMain {
 		patterns.store(new FileOutputStream(resultFile),null);
 	}
 	
+	/**
+	 * 
+	 * Convierte un archivo de imagen a un array de boolean
+	 * 
+	 * @param imgFile
+	 * @return
+	 */
 	private static boolean[] toBooleanData(File imgFile) {
 		try {
 			boolean[] imgData = new boolean[HEIGHT*WIDTH];
@@ -122,8 +155,14 @@ public class EncogMain {
 			throw new RuntimeException(e);
 		}
 	}
-	
+	/**
+	 * Determina si un color está más cerca del negro (true) o del blanco (false) en base a un valor de barrera
+	 * 
+	 * @param rgbColor
+	 * @return
+	 */
 	private static boolean isBlack(int rgbColor){
+		int threshold = 100;
 		int r = (rgbColor >> 16) & 0xff;
 		int g = (rgbColor >> 8) & 0xff;
 		int b = rgbColor & 0xff;
@@ -132,9 +171,16 @@ public class EncogMain {
 		double whiteBlueDiff = 255 - b;
 		double whiteDistance = whiteRedDiff * whiteRedDiff + whiteGreenDiff * whiteGreenDiff + whiteBlueDiff * whiteBlueDiff;
 		
-		return whiteDistance > 100 ? true : false;
+		return whiteDistance > threshold ? true : false;
 	}
 	
+	/**
+	 * 
+	 * Convierte un {@link BiPolarNeuralData} a una {@link BufferedImage} para almacenar en disco
+	 * 
+	 * @param data
+	 * @return
+	 */
 	private static BufferedImage toImage(BiPolarNeuralData data) {
 		int i = 0;
 		BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_BYTE_GRAY);
@@ -152,6 +198,14 @@ public class EncogMain {
 		return image;
 	}
 	
+	/**
+	 * 
+	 * En base a una red neuronal y a un set de prubas realiza la validación y retorna el resultado
+	 * 
+	 * @param network
+	 * @param testData
+	 * @return
+	 */
 	private static BiPolarNeuralData evaluatePattern(HopfieldNetwork network,
 			BiPolarNeuralData testData) {
 		
@@ -166,6 +220,13 @@ public class EncogMain {
 		return result;
 	}
 
+	/**
+	 * 
+	 * Convierte un {@link BiPolarNeuralData} a una cadena de caracteres donde el true se representa como un caracter 'O' y el false como un ' '
+	 * 
+	 * @param data
+	 * @return
+	 */
 	public static String toText(BiPolarNeuralData data) {
 		int index = 0;
 		StringBuilder sb = new StringBuilder();
